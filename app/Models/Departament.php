@@ -8,4 +8,5 @@ use Illuminate\Database\Eloquent\Model;
 class Departament extends Model
 {
     use HasFactory;
+    protected $guarded = []; //se usa para desactivar el mass asignament
 }
