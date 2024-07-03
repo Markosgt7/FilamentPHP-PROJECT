@@ -12,6 +12,7 @@ use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
+use Filament\Forms\Components\Select;
 
 class HolidayResource extends Resource
 {
@@ -23,15 +24,20 @@ class HolidayResource extends Resource
     {
         return $form
             ->schema([
-                Forms\Components\TextInput::make('calendar_id')
-                    ->required()
-                    ->numeric(),
-                Forms\Components\TextInput::make('user_id')
-                    ->required()
-                    ->numeric(),
-                Forms\Components\DatePicker::make('day')
+                Select::make('calendar_id')
+                    ->relationship(name: 'calendar', titleAttribute: 'name')
                     ->required(),
-                Forms\Components\TextInput::make('type')
+                Select::make('user_id')
+                    ->relationship(name: 'user', titleAttribute: 'name')
+                    ->required(),
+                Select::make('type')
+                    ->options([
+                        'decline' => 'Decline',
+                        'approved' => 'Approved',
+                        'pending' => 'Pending'
+                    ])
+                    ->required(),
+                Forms\Components\DatePicker::make('day')
                     ->required(),
             ]);
     }
@@ -40,12 +46,12 @@ class HolidayResource extends Resource
     {
         return $table
             ->columns([
-                Tables\Columns\TextColumn::make('calendar_id')
-                    ->numeric()
-                    ->sortable(),
-                Tables\Columns\TextColumn::make('user_id')
-                    ->numeric()
-                    ->sortable(),
+                Tables\Columns\TextColumn::make('calendar.name')
+                    ->sortable()
+                    ->searchable(),
+                Tables\Columns\TextColumn::make('user.name')
+                    ->sortable()
+                    ->searchable(),
                 Tables\Columns\TextColumn::make('day')
                     ->date()
                     ->sortable(),
