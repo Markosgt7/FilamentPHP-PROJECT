@@ -12,6 +12,9 @@ use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
+use Illuminate\Support\Facades\Auth;
+use Filament\Forms\Components\Select;
+use Filament\Tables\Filters\SelectFilter;
 
 class HolidayResource extends Resource
 {
@@ -19,11 +22,20 @@ class HolidayResource extends Resource
 
     protected static ?string $navigationIcon = 'heroicon-o-calendar-days';
 
+    public static function getEloquentQuery(): Builder
+    {
+        return parent::getEloquentQuery()->where('user_id', Auth::user()->id);
+    }
+
     public static function form(Form $form): Form
     {
         return $form
             ->schema([
-                //
+                Select::make('calendar_id')
+                    ->relationship(name: 'calendar', titleAttribute: 'name')
+                    ->required(),
+                Forms\Components\DatePicker::make('day')
+                    ->required(),
             ]);
     }
 
@@ -58,10 +70,16 @@ class HolidayResource extends Resource
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
-                //
+                SelectFilter::make('type')
+                    ->options([
+                        'approved' => 'Approved',
+                        'decline' => 'Decline',
+                        'pending' => 'Pending',
+                    ])
             ])
             ->actions([
                 Tables\Actions\EditAction::make(),
+                Tables\Actions\DeleteAction::make(),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
